@@ -18,8 +18,8 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
 #include "stm32f1xx_it.h"
+#include "main.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 // #include "mpu6050.h"
@@ -28,7 +28,7 @@
 // #include <stdio.h>
 // #include <string.h>
 
-#include "tim.h"
+// #include "tim.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -38,7 +38,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define IRQ_TIME 10
+#define IRQ_TIME 10.0
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -69,6 +69,7 @@
 
 /* External variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim2;
 extern UART_HandleTypeDef huart1;
 /* USER CODE BEGIN EV */
 // extern MPU6050_t mpu6050;
@@ -79,8 +80,8 @@ extern UART_HandleTypeDef huart1;
 /*           Cortex-M3 Processor Interruption and Exception Handlers          */
 /******************************************************************************/
 /**
-  * @brief This function handles Non maskable interrupt.
-  */
+ * @brief This function handles Non maskable interrupt.
+ */
 void NMI_Handler(void)
 {
   /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
@@ -93,68 +94,64 @@ void NMI_Handler(void)
 }
 
 /**
-  * @brief This function handles Hard fault interrupt.
-  */
+ * @brief This function handles Hard fault interrupt.
+ */
 void HardFault_Handler(void)
 {
   /* USER CODE BEGIN HardFault_IRQn 0 */
 
   /* USER CODE END HardFault_IRQn 0 */
-  while (1)
-  {
+  while (1) {
     /* USER CODE BEGIN W1_HardFault_IRQn 0 */
     /* USER CODE END W1_HardFault_IRQn 0 */
   }
 }
 
 /**
-  * @brief This function handles Memory management fault.
-  */
+ * @brief This function handles Memory management fault.
+ */
 void MemManage_Handler(void)
 {
   /* USER CODE BEGIN MemoryManagement_IRQn 0 */
 
   /* USER CODE END MemoryManagement_IRQn 0 */
-  while (1)
-  {
+  while (1) {
     /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
     /* USER CODE END W1_MemoryManagement_IRQn 0 */
   }
 }
 
 /**
-  * @brief This function handles Prefetch fault, memory access fault.
-  */
+ * @brief This function handles Prefetch fault, memory access fault.
+ */
 void BusFault_Handler(void)
 {
   /* USER CODE BEGIN BusFault_IRQn 0 */
 
   /* USER CODE END BusFault_IRQn 0 */
-  while (1)
-  {
+  while (1) {
     /* USER CODE BEGIN W1_BusFault_IRQn 0 */
     /* USER CODE END W1_BusFault_IRQn 0 */
   }
 }
 
 /**
-  * @brief This function handles Undefined instruction or illegal state.
-  */
+ * @brief This function handles Undefined instruction or illegal state.
+ */
 void UsageFault_Handler(void)
 {
   /* USER CODE BEGIN UsageFault_IRQn 0 */
 
   /* USER CODE END UsageFault_IRQn 0 */
-  while (1)
-  {
+  while (1) {
     /* USER CODE BEGIN W1_UsageFault_IRQn 0 */
     /* USER CODE END W1_UsageFault_IRQn 0 */
   }
 }
 
 /**
-  * @brief This function handles System service call via SWI instruction.
-  */
+ * @brief This function handles System service call via SWI instruction.
+ */
 void SVC_Handler(void)
 {
   /* USER CODE BEGIN SVCall_IRQn 0 */
@@ -166,8 +163,8 @@ void SVC_Handler(void)
 }
 
 /**
-  * @brief This function handles Debug monitor.
-  */
+ * @brief This function handles Debug monitor.
+ */
 void DebugMon_Handler(void)
 {
   /* USER CODE BEGIN DebugMonitor_IRQn 0 */
@@ -179,8 +176,8 @@ void DebugMon_Handler(void)
 }
 
 /**
-  * @brief This function handles Pendable request for system service.
-  */
+ * @brief This function handles Pendable request for system service.
+ */
 void PendSV_Handler(void)
 {
   /* USER CODE BEGIN PendSV_IRQn 0 */
@@ -192,8 +189,8 @@ void PendSV_Handler(void)
 }
 
 /**
-  * @brief This function handles System tick timer.
-  */
+ * @brief This function handles System tick timer.
+ */
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
@@ -213,8 +210,8 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles EXTI line1 interrupt.
-  */
+ * @brief This function handles EXTI line1 interrupt.
+ */
 void EXTI1_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI1_IRQn 0 */
@@ -227,8 +224,8 @@ void EXTI1_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles EXTI line2 interrupt.
-  */
+ * @brief This function handles EXTI line2 interrupt.
+ */
 void EXTI2_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI2_IRQn 0 */
@@ -241,8 +238,8 @@ void EXTI2_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles TIM1 update interrupt.
-  */
+ * @brief This function handles TIM1 update interrupt.
+ */
 void TIM1_UP_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_UP_IRQn 0 */
@@ -255,8 +252,8 @@ void TIM1_UP_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles USART1 global interrupt.
-  */
+ * @brief This function handles USART1 global interrupt.
+ */
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
@@ -269,36 +266,6 @@ void USART1_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
-/* typedef struct
-{
-  float x, y, z;
-} vec3;
-
-vec3 mpu6050_data; */
-
-// void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-// {
-//   static float pitch, roll, yaw;
-//   static uint32_t last_tick = 0;
-//   if (GPIO_Pin == MPU6050_INT_Pin) {
-//     /* shellPrint(&shell,
-//                "tick: %d\r\n",
-//                HAL_GetTick() - last_tick);
-//     last_tick = HAL_GetTick(); */
-//     while (!mpu_dmp_get_data(&pitch, &roll, &yaw)) {
-//       shellPrint(&shell,
-//                  "MPU6050: %f, %f, %f, %d\r\n",
-//                  pitch, roll, yaw,
-//                  HAL_GetTick() - last_tick);
-//       last_tick = HAL_GetTick();
-//     }
-//   }
-// }
-
-// char tmp[50];
-// uint32_t last;
-
-// uint32_t percent = 0;
 
 #define SERVO_MIN_X 800
 #define SERVO_MID_X 1500
@@ -318,6 +285,7 @@ int Clamp(int x, int min, int max)
   } else if (x >= max) {
     return max;
   }
+  return x;
 }
 
 int Lerp(int start, int end, float percent)
@@ -328,45 +296,123 @@ int Lerp(int start, int end, float percent)
 int servo_x = SERVO_MID_X,
     servo_y = SERVO_MID_Y;
 
-int servo_last_x = SERVO_MID_X,
-    servo_last_y = SERVO_MID_Y;
+int current_x = SERVO_MID_X,
+    current_y = SERVO_MID_Y;
+
+int last_x = SERVO_MID_X,
+    last_y = SERVO_MID_Y;
 
 int count = 0;
 
-float move_time = 3000;
+#define MOVE_TIME 3000
 
-bool servo_finish = false;
+uint16_t move_time = MOVE_TIME;
+
+bool servo_finish = true;
 
 #define SERVO_FINISH_PERCENT 99.0
+
+#define Servo_Set_X(PWM)                            \
+  __HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_1, PWM); \
+  current_x = PWM
+
+#define Servo_Set_Y(PWM)                            \
+  __HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_2, PWM); \
+  current_y = PWM
 
 void Servo_Move()
 {
   static float percent = 0;
 
-  percent = ++count / (move_time / 10);
+  percent = ++count / (move_time / IRQ_TIME);
 
   if (percent >= SERVO_FINISH_PERCENT) {
     servo_finish = true;
   }
 
-  Servo_Set_X(Clamp(Lerp(servo_x, servo_last_x, percent), SERVO_MIN_X, SERVO_MAX_X));
-  Servo_Set_Y(Clamp(Lerp(servo_y, servo_last_y, percent), SERVO_MIN_Y, SERVO_MAX_Y));
+  Servo_Set_X(Clamp(Lerp(servo_x, last_x, percent),
+                    SERVO_MIN_X, SERVO_MAX_X));
+  Servo_Set_Y(Clamp(Lerp(servo_y, last_y, percent),
+                    SERVO_MIN_Y, SERVO_MAX_Y));
 }
 
-#define Update_Servo_Last(target, last) \
-  if (last != target) last = target
+// #define Update_Servo_Last(target, last) \
+//   if (last != target) last = target
+
+enum {
+  STATE_IDLE,
+  STATE_RESET,
+  STATE_SQUARE,
+  STATE_A4_RECT,
+} state = STATE_IDLE;
+
+void Servo_Update(uint16_t x, uint16_t y, uint16_t time)
+{
+  last_x = servo_x;
+  last_y = servo_y;
+
+  servo_x = x;
+  servo_y = y;
+
+  move_time = time;
+
+  count = 0;
+
+  servo_finish = false;
+}
+
+enum square_stage_enum {
+  SQUARE_START,
+  SQUARE_RST_LT,
+  SQUARE_LT_RT,
+  SQUARE_RT_RB,
+  SQUARE_RB_LB,
+  SQUARE_LB_LT,
+  SQUARE_LT_RST,
+} square_stage = SQUARE_RST_LT;
+// bool square_next = false;
+
+const uint16_t SQUARE_PWM[][2] = {
+    [SQUARE_RST_LT] = {0, 0},
+    [SQUARE_LT_RT]  = {0, 0},
+    [SQUARE_RT_RB]  = {0, 0},
+    [SQUARE_RB_LB]  = {0, 0},
+    [SQUARE_LB_LT]  = {0, 0},
+    [SQUARE_LT_RST] = {0, 0},
+};
+
+#define TURN_WAIT 1000
+
+#define X 0
+#define Y 1
+
+void Servo_Square()
+{
+  static uint16_t square_pwm[2] = {SERVO_MID_X, SERVO_MID_Y};
+
+  if (servo_finish) {
+    // square_next = false;
+    // TODO: TURN_WAIT
+    // HAL_Delay(TURN_WAIT);
+    square_stage++;
+    Servo_Update(SQUARE_PWM[square_stage][X],
+                 SQUARE_PWM[square_stage][Y],
+                 MOVE_TIME);
+  }
+
+  switch (square_stage) {
+    case SQUARE_RST_LT:
+
+      break;
+
+    default:
+      break;
+  }
+}
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim == &htim1) {
-    
-
-    Update_Servo_Last(servo_x, servo_last_x);
-    Update_Servo_Last(servo_y, servo_last_y);
-
-    // sprintf(tmp, "%d\r\n", HAL_GetTick() - last);
-    // HAL_UART_Transmit_IT(&huart1, tmp, strlen(tmp));
-    // last = HAL_GetTick();
   }
 }
 

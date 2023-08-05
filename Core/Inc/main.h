@@ -49,8 +49,6 @@ typedef enum {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-#define Servo_Set_X(PWM) __HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_1, PWM)
-#define Servo_Set_Y(PWM) __HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_2, PWM)
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
