@@ -33,6 +33,6 @@ IndentCaseLabels: true
 
 SortIncludes: CaseSensitive
 
-AlignConsecutiveMacros: AcrossEmptyLinesAndComments
+AlignConsecutiveMacros: AcrossComments
 
 AlignConsecutiveAssignments: Consecutive

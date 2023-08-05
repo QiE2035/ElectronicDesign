@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.h
-  * @brief          : Header for main.c file.
-  *                   This file contains the common defines of the application.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2023 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.h
+ * @brief          : Header for main.c file.
+ *                   This file contains the common defines of the application.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2023 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -36,7 +36,10 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
+typedef enum {
+  false,
+  true
+} bool;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -46,7 +49,8 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
+#define Servo_Set_X(PWM) __HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_1, PWM)
+#define Servo_Set_Y(PWM) __HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_2, PWM)
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -63,10 +67,10 @@ void Error_Handler(void);
 #define BTN_PAUSE_Pin GPIO_PIN_2
 #define BTN_PAUSE_GPIO_Port GPIOA
 #define BTN_PAUSE_EXTI_IRQn EXTI2_IRQn
-#define SERVO_X_Pin GPIO_PIN_8
+#define SERVO_X_Pin GPIO_PIN_15
 #define SERVO_X_GPIO_Port GPIOA
-#define SERVO_Y_Pin GPIO_PIN_9
-#define SERVO_Y_GPIO_Port GPIOA
+#define SERVO_Y_Pin GPIO_PIN_3
+#define SERVO_Y_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 
