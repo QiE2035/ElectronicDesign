@@ -28,7 +28,7 @@
 // #include <stdio.h>
 // #include <string.h>
 
-// #include "tim.h"
+#include "tim.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -38,7 +38,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define TIM_IRQ_TIME 10.0
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -69,7 +68,6 @@
 
 /* External variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim1;
-extern TIM_HandleTypeDef htim2;
 extern UART_HandleTypeDef huart1;
 /* USER CODE BEGIN EV */
 // extern MPU6050_t mpu6050;
@@ -266,17 +264,21 @@ void USART1_IRQHandler(void)
 }
 
 /* USER CODE BEGIN 1 */
+#define TIM_IRQ_TIME 10.0
 
-#define SERVO_MIN_X 800
-#define SERVO_MID_X 1500
-#define SERVO_MAX_X 2200
+#define TMP_OFFSET (-30)
 
-#define SERVO_MIN_Y 800
-#define SERVO_MID_Y 1500
-#define SERVO_MAX_Y 2200
+// TODO: MIN MAX
+#define SERVO_MIN_X 1300
+#define SERVO_MID_X (1550 + TMP_OFFSET - 9)
+#define SERVO_MAX_X 1800
+
+#define SERVO_MIN_Y 1300
+#define SERVO_MID_Y (1570 + TMP_OFFSET - 14)
+#define SERVO_MAX_Y 1800
 
 // #define Max(a, b) (((a) > (b)) ? (a) : (b))
-// #define Min(a, b) (((a) < (b)) ? (a) : (b))
+#define Min(a, b) (((a) < (b)) ? (a) : (b))
 
 int Clamp(int x, int min, int max)
 {
@@ -290,7 +292,7 @@ int Clamp(int x, int min, int max)
 
 int Lerp(int start, int end, float percent)
 {
-  return start + (end - start) * percent;
+  return start + (end - start) * Min(percent, 1);
 }
 
 int servo_x = SERVO_MID_X,
@@ -304,14 +306,14 @@ int last_x = SERVO_MID_X,
 
 int count = 0;
 
-#define RESET_TIME  3000
-#define SQUARE_TIME 3000
+#define RESET_TIME  1500
+#define SQUARE_TIME 1500
 
 uint16_t move_time = 3000;
 
 bool servo_finish = true;
 
-#define SERVO_FINISH_PERCENT 99.0
+#define SERVO_FINISH_PERCENT 1.0
 
 #define Servo_Set_X(PWM)                            \
   __HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_1, PWM); \
@@ -331,9 +333,9 @@ void Servo_Move()
     servo_finish = true;
   }
 
-  Servo_Set_X(Clamp(Lerp(servo_x, last_x, percent),
+  Servo_Set_X(Clamp(Lerp(last_x, servo_x, percent),
                     SERVO_MIN_X, SERVO_MAX_X));
-  Servo_Set_Y(Clamp(Lerp(servo_y, last_y, percent),
+  Servo_Set_Y(Clamp(Lerp(last_y, servo_y, percent),
                     SERVO_MIN_Y, SERVO_MAX_Y));
 }
 
@@ -346,8 +348,8 @@ enum {
 
 void Servo_Update(uint16_t x, uint16_t y, uint16_t time)
 {
-  last_x = servo_x;
-  last_y = servo_y;
+  last_x = current_x;
+  last_y = current_y;
 
   servo_x = x;
   servo_y = y;
@@ -359,7 +361,7 @@ void Servo_Update(uint16_t x, uint16_t y, uint16_t time)
   servo_finish = false;
 }
 
-#define SQUARE_COUNT 7
+#define SQUARE_COUNT 8
 
 enum square_stage_enum {
   SQUARE_RESET,
@@ -368,18 +370,24 @@ enum square_stage_enum {
   SQUARE_RT_RB,
   SQUARE_RB_LB,
   SQUARE_LB_LT,
+  SQUARE_LT_LC,
   SQUARE_LT_RST,
 } square_stage = SQUARE_RESET;
 // bool square_next = false;
 
+// #define TOP_OFFSET    (-30)
+// #define BOTTOM_OFFSET (-30)
+// #define LEFT_OFFSET   (-30)
+
 const uint16_t SQUARE_PWM[][2] = {
-    [SQUARE_RST_LT] = {SERVO_MID_X, SERVO_MID_Y},
-    [SQUARE_RST_LT] = {0, 0},
-    [SQUARE_LT_RT]  = {0, 0},
-    [SQUARE_RT_RB]  = {0, 0},
-    [SQUARE_RB_LB]  = {0, 0},
-    [SQUARE_LB_LT]  = {0, 0},
-    [SQUARE_LT_RST] = {0, 0},
+    [SQUARE_RESET]  = {SERVO_MID_X, SERVO_MID_Y},
+    [SQUARE_RST_LT] = {1670 + TMP_OFFSET - 1, 1420 + TMP_OFFSET - 13},
+    [SQUARE_LT_RT]  = {1440 + TMP_OFFSET - 4, 1420 + TMP_OFFSET - 13},
+    [SQUARE_RT_RB]  = {1440 + TMP_OFFSET - 4, 1710 + TMP_OFFSET - 13},
+    [SQUARE_RB_LB]  = {1660 + TMP_OFFSET, 1710 + TMP_OFFSET - 13},
+    [SQUARE_LB_LT]  = {1670 + TMP_OFFSET - 1, 1420 + TMP_OFFSET - 18},
+    [SQUARE_LT_LC]  = {SERVO_MID_X, 1420 + TMP_OFFSET - 18},
+    [SQUARE_LT_RST] = {SERVO_MID_X, SERVO_MID_Y},
 };
 
 #define TURN_WAIT 1000
@@ -389,40 +397,61 @@ const uint16_t SQUARE_PWM[][2] = {
 
 #define SQUARE_PWM_CUR SQUARE_PWM[square_stage]
 
+void Servo_Reset()
+{
+  uint16_t servo_mid_x = SERVO_MID_X;
+
+  square_stage = SQUARE_RESET;
+
+  state = STATE_RESET;
+
+  if (current_x < SERVO_MID_X) {
+    servo_mid_x += 18;
+  }
+  Servo_Update(servo_mid_x, SERVO_MID_Y, RESET_TIME);
+}
+
 void Servo_Square()
 {
   if (servo_finish) {
     // square_next = false;
     // TODO: TURN_WAIT
     // HAL_Delay(TURN_WAIT);
-    if (square_stage >= SQUARE_COUNT) {
+    if (++square_stage >= SQUARE_COUNT) {
       square_stage = SQUARE_RESET;
 
       // count = 0;
-      state = STATE_RESET;
+      Servo_Reset();
       return;
     }
     Servo_Update(SQUARE_PWM_CUR[X],
                  SQUARE_PWM_CUR[Y],
                  SQUARE_TIME);
-    square_stage++;
+    // square_stage++;
   }
 
   Servo_Move();
 }
 
+void Servo_A4()
+{
+}
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
+  // static bool is_reset = false;
   if (htim == &htim1) {
     switch (state) {
       case STATE_RESET:
-        Servo_Update(SERVO_MID_X, SERVO_MID_Y, RESET_TIME);
+        // state = STATE_SQUARE;
+        Servo_Move();
         break;
       case STATE_SQUARE:
+        // is_reset = false;
         Servo_Square();
         break;
       default:
-        state = STATE_RESET;
+        Servo_Reset();
         break;
     }
   }
@@ -430,9 +459,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  if (GPIO_Pin == BTN_PAUSE_Pin) {
-    HAL_Delay(TIM_IRQ_TIME);
-    state = STATE_SQUARE;
+  // HAL_Delay(TIM_IRQ_TIME);
+  switch (GPIO_Pin) {
+    case BTN_PAUSE_Pin:
+      // if(state==STATE_RESET)
+      state = STATE_SQUARE;
+      break;
+    case BTN_RST_Pin:
+      Servo_Reset();
+      break;
   }
 }
 

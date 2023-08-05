@@ -170,11 +170,13 @@ int main(void)
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
 
+  // HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_10);
+
   // HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
   // HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
 
-  // __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_1, 1565);
-  // __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_2, 1565);
+  // __HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_1, 1500);
+  // __HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_2, 1500);
 
   // shell.write = Shell_Write;
   // shellInit(&shell);
