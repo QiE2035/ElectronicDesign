@@ -38,7 +38,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define IRQ_TIME 10.0
+#define TIM_IRQ_TIME 10.0
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -304,9 +304,10 @@ int last_x = SERVO_MID_X,
 
 int count = 0;
 
-#define MOVE_TIME 3000
+#define RESET_TIME  3000
+#define SQUARE_TIME 3000
 
-uint16_t move_time = MOVE_TIME;
+uint16_t move_time = 3000;
 
 bool servo_finish = true;
 
@@ -324,7 +325,7 @@ void Servo_Move()
 {
   static float percent = 0;
 
-  percent = ++count / (move_time / IRQ_TIME);
+  percent = ++count / (move_time / TIM_IRQ_TIME);
 
   if (percent >= SERVO_FINISH_PERCENT) {
     servo_finish = true;
@@ -336,15 +337,12 @@ void Servo_Move()
                     SERVO_MIN_Y, SERVO_MAX_Y));
 }
 
-// #define Update_Servo_Last(target, last) \
-//   if (last != target) last = target
-
 enum {
-  STATE_IDLE,
+  // STATE_IDLE,
   STATE_RESET,
   STATE_SQUARE,
   STATE_A4_RECT,
-} state = STATE_IDLE;
+} state = STATE_RESET;
 
 void Servo_Update(uint16_t x, uint16_t y, uint16_t time)
 {
@@ -361,18 +359,21 @@ void Servo_Update(uint16_t x, uint16_t y, uint16_t time)
   servo_finish = false;
 }
 
+#define SQUARE_COUNT 7
+
 enum square_stage_enum {
-  SQUARE_START,
+  SQUARE_RESET,
   SQUARE_RST_LT,
   SQUARE_LT_RT,
   SQUARE_RT_RB,
   SQUARE_RB_LB,
   SQUARE_LB_LT,
   SQUARE_LT_RST,
-} square_stage = SQUARE_RST_LT;
+} square_stage = SQUARE_RESET;
 // bool square_next = false;
 
 const uint16_t SQUARE_PWM[][2] = {
+    [SQUARE_RST_LT] = {SERVO_MID_X, SERVO_MID_Y},
     [SQUARE_RST_LT] = {0, 0},
     [SQUARE_LT_RT]  = {0, 0},
     [SQUARE_RT_RB]  = {0, 0},
@@ -386,33 +387,52 @@ const uint16_t SQUARE_PWM[][2] = {
 #define X 0
 #define Y 1
 
+#define SQUARE_PWM_CUR SQUARE_PWM[square_stage]
+
 void Servo_Square()
 {
-  static uint16_t square_pwm[2] = {SERVO_MID_X, SERVO_MID_Y};
-
   if (servo_finish) {
     // square_next = false;
     // TODO: TURN_WAIT
     // HAL_Delay(TURN_WAIT);
+    if (square_stage >= SQUARE_COUNT) {
+      square_stage = SQUARE_RESET;
+
+      // count = 0;
+      state = STATE_RESET;
+      return;
+    }
+    Servo_Update(SQUARE_PWM_CUR[X],
+                 SQUARE_PWM_CUR[Y],
+                 SQUARE_TIME);
     square_stage++;
-    Servo_Update(SQUARE_PWM[square_stage][X],
-                 SQUARE_PWM[square_stage][Y],
-                 MOVE_TIME);
   }
 
-  switch (square_stage) {
-    case SQUARE_RST_LT:
-
-      break;
-
-    default:
-      break;
-  }
+  Servo_Move();
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   if (htim == &htim1) {
+    switch (state) {
+      case STATE_RESET:
+        Servo_Update(SERVO_MID_X, SERVO_MID_Y, RESET_TIME);
+        break;
+      case STATE_SQUARE:
+        Servo_Square();
+        break;
+      default:
+        state = STATE_RESET;
+        break;
+    }
+  }
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if (GPIO_Pin == BTN_PAUSE_Pin) {
+    HAL_Delay(TIM_IRQ_TIME);
+    state = STATE_SQUARE;
   }
 }
 

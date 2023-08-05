@@ -79,7 +79,7 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+/* void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
   HAL_UART_Receive_IT(huart, &uart_data, UART_SIZE);
   if (&huart1 == huart) {
@@ -110,7 +110,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
       frame.data[offset++] = uart_data;
     }
   }
-}
+} */
 
 // void Shell_Write(const char data)
 // {
@@ -175,14 +175,13 @@ int main(void)
 
   // __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_1, 1565);
   // __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_2, 1565);
-  // __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_3, 1565);
-  // __HAL_TIM_SetCompare(&htim1, TIM_CHANNEL_4, 1565);
 
   // shell.write = Shell_Write;
   // shellInit(&shell);
 
-  HAL_UART_Receive_IT(&huart1, &uart_data, UART_SIZE);
+  // HAL_UART_Receive_IT(&huart1, &uart_data, UART_SIZE);
   // __HAL_TIM_SetCompare(&htim2, TIM_CHANNEL_1, 2200);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
