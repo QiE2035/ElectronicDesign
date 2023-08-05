@@ -29,6 +29,7 @@
 // #include <string.h>
 
 #include "tim.h"
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -274,7 +275,7 @@ void USART1_IRQHandler(void)
 #define SERVO_MAX_X 1800
 
 #define SERVO_MIN_Y 1300
-#define SERVO_MID_Y (1570 + TMP_OFFSET - 14)
+#define SERVO_MID_Y (1570 + TMP_OFFSET - 16)
 #define SERVO_MAX_Y 1800
 
 // #define Max(a, b) (((a) > (b)) ? (a) : (b))
@@ -397,16 +398,29 @@ const uint16_t SQUARE_PWM[][2] = {
 
 #define SQUARE_PWM_CUR SQUARE_PWM[square_stage]
 
+enum a4_stage_enum {
+  A4_RESET,
+  A4_RST_LT,
+  A4_LT_RT,
+  A4_RT_RB,
+  A4_RB_LB,
+  A4_LB_LT,
+  // A4_LT_LC,
+  A4_LT_RST,
+} a4_stage = A4_RESET;
+
 void Servo_Reset()
 {
   uint16_t servo_mid_x = SERVO_MID_X;
 
   square_stage = SQUARE_RESET;
 
+  a4_stage = A4_RESET;
+
   state = STATE_RESET;
 
   if (current_x < SERVO_MID_X) {
-    servo_mid_x += 18;
+    servo_mid_x += 20;
   }
   Servo_Update(servo_mid_x, SERVO_MID_Y, RESET_TIME);
 }
@@ -430,40 +444,96 @@ void Servo_Square()
     // square_stage++;
   }
 
-  Servo_Move();
+  // Servo_Move();
 }
 
-void Servo_A4()
+#define A4_COUNT 7
+
+#define A4_PWM_CUR A4_PWM[a4_stage]
+
+const uint16_t A4_PWM[][2] = {
+    [A4_RESET]  = {SERVO_MID_X, SERVO_MID_Y},
+    [A4_RST_LT] = {1632, 1500},
+    [A4_LT_RT]  = {1534, 1500},
+    [A4_RT_RB]  = {1533, 1664},
+    [A4_RB_LB]  = {1633, 1663},
+    [A4_LB_LT]  = {1633, 1501},
+    // [A4_LT_LC]  = {1585, 1498},
+    [A4_LT_RST] = {SERVO_MID_X, SERVO_MID_Y},
+};
+
+#define A4_TIME 1500
+
+void Servo_A4_Rect()
 {
+  if (servo_finish) {
+    if (++a4_stage >= A4_COUNT) {
+      a4_stage = SQUARE_RESET;
+
+      // count = 0;
+      Servo_Reset();
+      return;
+    }
+    Servo_Update(A4_PWM_CUR[X],
+                 A4_PWM_CUR[Y],
+                 A4_TIME);
+  }
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  // static bool is_reset = false;
   if (htim == &htim1) {
     switch (state) {
       case STATE_RESET:
-        // state = STATE_SQUARE;
-        Servo_Move();
+        // Servo_Move();
         break;
       case STATE_SQUARE:
-        // is_reset = false;
         Servo_Square();
+        break;
+      case STATE_A4_RECT:
+        Servo_A4_Rect();
         break;
       default:
         Servo_Reset();
         break;
     }
+    Servo_Move();
   }
 }
 
+#define WAIT_OPENMV_TIME 3000
+#define Read_Pause_Btn() HAL_GPIO_ReadPin(BTN_PAUSE_GPIO_Port, BTN_PAUSE_Pin)
+#define Read_Reset_Btn() HAL_GPIO_ReadPin(BTN_RST_GPIO_Port, BTN_RST_Pin)
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+  static char data  = 'N';
+  static bool pause = true;
   // HAL_Delay(TIM_IRQ_TIME);
   switch (GPIO_Pin) {
     case BTN_PAUSE_Pin:
-      // if(state==STATE_RESET)
-      state = STATE_SQUARE;
+      if (state == STATE_RESET && servo_finish) {
+        HAL_UART_Transmit(&huart1, "?", 1, WAIT_OPENMV_TIME);
+        HAL_UART_Receive(&huart1, &data, 1, WAIT_OPENMV_TIME);
+        if (data == 'Y') {
+          state = STATE_A4_RECT;
+        } else {
+          state = STATE_SQUARE;
+        }
+      } else {
+        if (pause) {
+          while (!Read_Pause_Btn()) {
+            if (!Read_Reset_Btn()) { break; }
+          } // 按下
+          while (Read_Pause_Btn()) {
+            if (!Read_Reset_Btn()) { break; }
+          } // 松开
+          while (!Read_Pause_Btn()) {
+            if (!Read_Reset_Btn()) { break; }
+          } // 按下
+        }
+        pause = !pause;
+      }
       break;
     case BTN_RST_Pin:
       Servo_Reset();
