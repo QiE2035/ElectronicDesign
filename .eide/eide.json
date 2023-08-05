@@ -1,0 +1,87 @@
+{
+  "name": "Test-CubeMX",
+  "type": "ARM",
+  "dependenceList": [],
+  "srcDirs": [
+    ".eide/deps",
+    "Core",
+    "Drivers",
+    "Libs"
+  ],
+  "virtualFolder": {
+    "name": "<virtual_root>",
+    "files": [],
+    "folders": []
+  },
+  "outDir": "build",
+  "deviceName": "STM32F103C8T6",
+  "packDir": null,
+  "miscInfo": {
+    "uid": "2355cf3559827410f073216c3befc245"
+  },
+  "targets": {
+    "Debug": {
+      "excludeList": [],
+      "toolchain": "GCC",
+      "compileConfig": {
+        "cpuType": "Cortex-M3",
+        "floatingPointHardware": "none",
+        "scatterFilePath": "STM32F103C8TX_FLASH.ld",
+        "useCustomScatterFile": true,
+        "storageLayout": {
+          "RAM": [],
+          "ROM": []
+        },
+        "options": "null"
+      },
+      "uploader": "OpenOCD",
+      "uploadConfig": {
+        "bin": "",
+        "target": "${workspaceFolder}/stm32f103c8_blue_pill",
+        "interface": "stlink",
+        "baseAddr": "0x08000000"
+      },
+      "uploadConfigMap": {
+        "STLink": {
+          "bin": "",
+          "proType": "SWD",
+          "resetMode": "default",
+          "runAfterProgram": true,
+          "speed": 4000,
+          "address": "0x08000000",
+          "elFile": "None",
+          "optionBytes": ".eide/debug.st.option.bytes.ini",
+          "otherCmds": ""
+        },
+        "OpenOCD": {
+          "bin": "",
+          "target": "stm32f103c8_blue_pill",
+          "interface": "stlink",
+          "baseAddr": "0x08000000"
+        }
+      },
+      "custom_dep": {
+        "name": "default",
+        "incList": [
+          "Core/Inc",
+          "Drivers/STM32F1xx_HAL_Driver/Inc",
+          "Drivers/STM32F1xx_HAL_Driver/Inc/Legacy",
+          "Drivers/CMSIS/Device/ST/STM32F1xx/Include",
+          "Drivers/CMSIS/Include",
+          ".eide/deps",
+          "Libs/letter-shell",
+          "Libs/MPU6050",
+          "Libs/MPU6050/eMPL"
+        ],
+        "libList": [],
+        "sourceDirList": [],
+        "defineList": [
+          "DEBUG",
+          "USE_HAL_DRIVER",
+          "STM32F103xB"
+        ]
+      }
+    }
+  },
+  "version": "3.3"
+}

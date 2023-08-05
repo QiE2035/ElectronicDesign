@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "name": "STM32",
+            "compilerPath": "E:/RT-ThreadStudio/platform/env_released/env/tools/gnu_gcc/arm_gcc/mingw/bin/arm-none-eabi-gcc.exe",
+            "intelliSenseMode": "gcc-arm",
+            "configurationProvider": "cl.eide"
+        }
+    ],
+    "version": 4
+}

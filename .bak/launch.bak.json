@@ -1,0 +1,10 @@
+{
+    "cwd": "${workspaceRoot}",
+    "type": "cortex-debug",
+    "request": "launch",
+    "name": "pyocd",
+    "servertype": "pyocd",
+    "executable": "build\\Debug\\Test-CubeMX.elf",
+    "runToEntryPoint": "main",
+    "targetId": "cortex_m",
+}
